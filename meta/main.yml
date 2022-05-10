@@ -2,7 +2,7 @@ galaxy_info:
   author: Peter Gustafsson
   namespace: pgustafs
   role_name: azure_vm
-  description: Simple role to manage the life cykle of a virtual machine in Azure.
+  description: Simple role to manage the life cykle of a RHEL based virtual machine in Azure.
   company: Red Hat
 
   # If the issue tracker for your role is not on github, uncomment the
