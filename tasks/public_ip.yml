@@ -1,0 +1,11 @@
+---
+- name: "Ensure Public IP address for vm(s) exist"
+  azure.azcollection.azure_rm_publicipaddress:
+    resource_group: "{{ azure_vm_resource_group_name }}"
+    allocation_method: Static
+    name: "{{ azure_vm_vm_name_prefix }}{{ item }}-pubip"
+  register: public_ip
+
+- name: "Save the public ip address in the public_ips list"
+  ansible.builtin.set_fact:
+    public_ips: "{{ public_ips }} + [ '{{ public_ip.state.ip_address }}' ]"

@@ -1,0 +1,116 @@
+---
+# tasks file for ansible_azure_vm
+- name: "Ensure resource group {{ azure_vm_resource_group_name }} exist"
+  azure.azcollection.azure_rm_resourcegroup:
+    name: "{{ azure_vm_resource_group_name }}"
+    location: "{{ azure_vm_location }}"
+
+- name: "Ensure virtual network {{ azure_vm_vnet_name }} exist"
+  azure.azcollection.azure_rm_virtualnetwork:
+    resource_group: "{{ azure_vm_resource_group_name }}"
+    name: "{{ azure_vm_vnet_name }}"
+    address_prefixes: "{{ azure_vm_vnet_address_prefixes }}"
+
+- name: "Ensure subnet {{ azure_vm_subnet_name }} exist"
+  azure.azcollection.azure_rm_subnet:
+    resource_group: "{{ azure_vm_resource_group_name }}"
+    name: "{{ azure_vm_subnet_name }}"
+    address_prefix: "{{ azure_vm_subnet_address_prefix }}"
+    virtual_network: "{{ azure_vm_vnet_name }}"
+
+- name: "Initialize an empty list to store Public IP addresses in"
+  ansible.builtin.set_fact:
+    public_ips: []
+  when: azure_vm_public_ip
+
+- name: "Include Public Ip address tasks"
+  ansible.builtin.include_tasks: public_ip.yml
+  with_sequence: start=1 end={{ azure_vm_number_of_vm | int }}
+  when: azure_vm_public_ip
+
+- name: "print all public ip addresses in the public_ips list"
+  ansible.builtin.debug:
+    var: public_ips
+    verbosity: 2
+  when: azure_vm_public_ip
+
+- name: "Ensure Network Security Group that allows SSH/Cockpit/http exist"
+  azure.azcollection.azure_rm_securitygroup:
+    resource_group: "{{ azure_vm_resource_group_name }}"
+    name: "{{ azure_vm_resource_group_name }}-nsg"
+    rules:
+      - name: SSH
+        protocol: Tcp
+        destination_port_range: 22
+        access: Allow
+        priority: 101
+        direction: Inbound
+      - name: COCKPIT
+        protocol: Tcp
+        destination_port_range: 9090
+        access: Allow
+        priority: 102
+        direction: Inbound
+      - name: HTTP
+        protocol: Tcp
+        destination_port_range: 80
+        access: Allow
+        priority: 104
+        direction: Inbound
+
+- name: "Ensure virtual network inteface card(s) exist"
+  azure.azcollection.azure_rm_networkinterface:
+    resource_group: "{{ azure_vm_resource_group_name }}"
+    name: "{{ azure_vm_vm_name_prefix }}{{ item }}-Nic"
+    virtual_network: "{{ azure_vm_vnet_name }}"
+    subnet: "{{ azure_vm_subnet_name }}"
+    public_ip_name: "{{ azure_vm_vm_name_prefix }}{{ item }}-pubip"
+    security_group: "{{ azure_vm_resource_group_name }}-nsg"
+  with_sequence: start=1 end={{ azure_vm_number_of_vm | int }}
+  async: 1000
+  poll: 0
+  register: nic
+
+- name: "Wait until the virtual network inteface card(s) is created"
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: nic_status
+  until: nic_status.finished
+  retries: 500
+  delay: 4
+  with_items: "{{ nic.results }}"
+
+- name: "Ensure virtual machine(s) exist"
+  azure.azcollection.azure_rm_virtualmachine:
+    resource_group: "{{ azure_vm_resource_group_name }}"
+    name: "{{ azure_vm_vm_name_prefix }}{{ item }}"
+    vm_size: "{{ azure_vm_vm_size }}"
+    admin_username: "{{ azure_vm_admin_username }}"
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/{{ azure_vm_admin_username }}/.ssh/authorized_keys"
+        key_data: "{{ azure_vm_admin_ssh_pub_key }}"
+    network_interfaces: "{{ azure_vm_vm_name_prefix }}{{ item }}-Nic"
+    os_type: Linux
+    image: "{{ azure_vm_vm_image }}"
+    tags: "{{ azure_vm_vm_tags }}"
+  with_sequence: start=1 end={{ azure_vm_number_of_vm | int }}
+  async: 1000
+  poll: 0
+  register: vm
+
+- name: "Wait until the virtual machine(s) is created"
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: vm_status
+  until: vm_status.finished
+  retries: 500
+  delay: 4
+  with_items: "{{ vm.results }}"
+
+- name: "Ensure virtual machine(s) can be reached over ssh"
+  ansible.builtin.wait_for:
+    port: 22
+    host: "{{ item }}"
+    timeout: 600
+  with_items: "{{ public_ips }}"

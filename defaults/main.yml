@@ -1,0 +1,24 @@
+---
+# defaults file for ansible_azure_vm
+# general vars 
+azure_vm_location: northeurope
+# resource group vars
+azure_vm_resource_group_name: demo
+# virtual network vars
+azure_vm_vnet_name: vNet
+azure_vm_vnet_address_prefixes: "10.0.0.0/16"
+# subnet vars
+azure_vm_subnet_name: subnet
+azure_vm_subnet_address_prefix: "10.0.1.0/24"
+# public ip vars
+azure_vm_public_ip: true
+# vm vars
+azure_vm_vm_name_prefix: rhel
+azure_vm_number_of_vm: 2
+azure_vm_vm_size: Standard_DS1_v2
+azure_vm_admin_username: pgustafs 
+azure_vm_admin_ssh_pub_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMbO9QKzdNvJtJbCcr8+WA3JhVle9R8TG/Atb4L7LyCIFXsYxqZQOvfdw1sm2O9NFvRFb6Gag0rvNjTqw9O7R5qB+fepu+qkc7a5pwAP7SYcQNXZWblg7KKUd0vAeSLzBSWjAFEJpj/wwYaJBOyyGwNSfzF+mtSQqNVbrqtR0BvMa3ohuq/eHUKZ5Jx4SZP16S5CMjivu8BzMEVvyRB62Y/KtfvTH1/FDEPdPCcbaGzXxgK6zc1hKyIjShPMzRekW6O5kLQ88WaQuWqGp+mOJywYauIz4o2/mjySUeUjQSxL1KCmWEmS7tcNhXRUjmHTvoPPr+2csRGH7LzZOAb8F3 pgustafs@pgustafs-OSX
+azure_vm_vm_image: rhel8-golden-image
+azure_vm_vm_tags:
+  env: testing
+  app: dmeo
