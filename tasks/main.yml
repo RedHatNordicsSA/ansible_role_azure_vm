@@ -71,6 +71,11 @@
   poll: 0
   register: nic
 
+- name: "print nic variable"
+  ansible.builtin.debug:
+    var: nic
+    verbosity: 2
+
 - name: "Wait until the virtual network inteface card(s) is created"
   ansible.builtin.async_status:
     jid: "{{ item.ansible_job_id }}"

@@ -14,7 +14,7 @@ azure_vm_subnet_address_prefix: "10.0.1.0/24"
 azure_vm_public_ip: true
 # vm vars
 azure_vm_vm_name_prefix: rhel
-azure_vm_number_of_vm: 2
+azure_vm_number_of_vm: 1
 azure_vm_vm_size: Standard_DS1_v2
 azure_vm_admin_username: '{{ lookup("env", "azure_rhel_admin_username") }}'
 azure_vm_admin_ssh_pub_key: '{{ lookup("env", "azure_rhel_admin_ssh_pub_key") }}'
