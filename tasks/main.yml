@@ -70,6 +70,8 @@
   async: 1000
   poll: 0
   register: nic
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
 
 - name: "print nic variable"
   ansible.builtin.debug:
@@ -84,6 +86,8 @@
   retries: 500
   delay: 4
   with_items: "{{ nic.results }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
 
 - name: "Ensure virtual machine(s) exist"
   azure.azcollection.azure_rm_virtualmachine:
@@ -103,6 +107,8 @@
   async: 1000
   poll: 0
   register: vm
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
 
 - name: "Wait until the virtual machine(s) is created"
   ansible.builtin.async_status:
@@ -112,6 +118,8 @@
   retries: 500
   delay: 4
   with_items: "{{ vm.results }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
 
 - name: "Ensure virtual machine(s) can be reached over ssh"
   ansible.builtin.wait_for:
