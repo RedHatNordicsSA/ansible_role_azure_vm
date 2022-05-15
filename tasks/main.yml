@@ -1,19 +1,19 @@
 ---
 # tasks file for ansible_azure_vm
-- name: "Ensure resource group {{ azure_resource_group_name }} exist"
+- name: "Ensure resource group {{ azure_rg_name }} exist"
   azure.azcollection.azure_rm_resourcegroup:
-    name: "{{ azure_resource_group_name }}"
+    name: "{{ azure_rg_name }}"
     location: "{{ azure_location }}"
 
 - name: "Ensure virtual network {{ azure_vnet_name }} exist"
   azure.azcollection.azure_rm_virtualnetwork:
-    resource_group: "{{ azure_resource_group_name }}"
+    resource_group: "{{ azure_rg_name }}"
     name: "{{ azure_vnet_name }}"
     address_prefixes: "{{ azure_vnet_address_prefixes }}"
 
 - name: "Ensure subnet {{ azure_subnet_name }} exist"
   azure.azcollection.azure_rm_subnet:
-    resource_group: "{{ azure_resource_group_name }}"
+    resource_group: "{{ azure_rg_name }}"
     name: "{{ azure_subnet_name }}"
     address_prefix: "{{ azure_subnet_address_prefix }}"
     virtual_network: "{{ azure_vnet_name }}"
@@ -36,8 +36,8 @@
 
 - name: "Ensure Network Security Group that allows SSH/Cockpit/http exist"
   azure.azcollection.azure_rm_securitygroup:
-    resource_group: "{{ azure_resource_group_name }}"
-    name: "{{ azure_resource_group_name }}-nsg"
+    resource_group: "{{ azure_rg_name }}"
+    name: "{{ azure_rg_name }}-nsg"
     rules:
       - name: SSH
         protocol: Tcp
@@ -60,12 +60,12 @@
 
 - name: "Ensure virtual network inteface card(s) exist"
   azure.azcollection.azure_rm_networkinterface:
-    resource_group: "{{ azure_resource_group_name }}"
+    resource_group: "{{ azure_rg_name }}"
     name: "{{ azure_vm_name_prefix }}{{ item }}-Nic"
     virtual_network: "{{ azure_vnet_name }}"
     subnet: "{{ azure_subnet_name }}"
     public_ip_name: "{{ azure_vm_name_prefix }}{{ item }}-pubip"
-    security_group: "{{ azure_resource_group_name }}-nsg"
+    security_group: "{{ azure_rg_name }}-nsg"
   with_sequence: start=1 end={{ azure_number_of_vm | int }}
   async: 1000
   poll: 0
@@ -91,7 +91,7 @@
 
 - name: "Ensure virtual machine(s) exist"
   azure.azcollection.azure_rm_virtualmachine:
-    resource_group: "{{ azure_resource_group_name }}"
+    resource_group: "{{ azure_rg_name }}"
     name: "{{ azure_vm_name_prefix }}{{ item }}"
     vm_size: "{{ azure_vm_size }}"
     admin_username: "{{ azure_admin_username }}"

@@ -3,7 +3,7 @@
 # general vars 
 azure_location: northeurope
 # resource group vars
-azure_resource_group_name: demo
+azure_rg_name: demo
 # virtual network vars
 azure_vnet_name: vNet
 azure_vnet_address_prefixes: "10.0.0.0/16"
@@ -21,4 +21,4 @@ azure_admin_ssh_pub_key: '{{ lookup("env", "azure_rhel_admin_ssh_pub_key") }}'
 azure_vm_image: rhel8-golden-image
 azure_vm_tags:
   env: testing
-  app: demof
+  app: demo
