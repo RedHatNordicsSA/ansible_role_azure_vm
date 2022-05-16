@@ -63,6 +63,12 @@
         access: Allow
         priority: 104
         direction: Inbound
+      - name: DJANGO
+        protocol: Tcp
+        destination_port_range: 8000
+        access: Allow
+        priority: 106
+        direction: Inbound
 
 - name: "Ensure virtual network inteface card(s) exist"
   azure.azcollection.azure_rm_networkinterface:
