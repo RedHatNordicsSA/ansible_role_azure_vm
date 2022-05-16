@@ -10,6 +10,9 @@
     resource_group: "{{ azure_rg_name }}"
     name: "{{ azure_vnet_name }}"
     address_prefixes: "{{ azure_vnet_address_prefixes }}"
+  register: create_virtual_network
+  until: create_virtual_network is not failed
+  retries: 5
 
 - name: "Ensure subnet {{ azure_subnet_name }} exist"
   azure.azcollection.azure_rm_subnet:
@@ -17,6 +20,9 @@
     name: "{{ azure_subnet_name }}"
     address_prefix: "{{ azure_subnet_address_prefix }}"
     virtual_network: "{{ azure_vnet_name }}"
+  register: create_subnet
+  until: create_subnet is not failed
+  retries: 5
 
 - name: "Initialize an empty list to store Public IP addresses in"
   ansible.builtin.set_fact:
